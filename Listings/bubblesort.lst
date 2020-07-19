@@ -1,0 +1,211 @@
+
+
+
+ARM Macro Assembler    Page 1 
+
+
+    1 00000000         ; Exemplo.s
+    2 00000000         ; Desenvolvido para a placa EK-TM4C1294XL
+    3 00000000         ; Prof. Guilherme Peron
+    4 00000000         ; 12/03/2018
+    5 00000000         
+    6 00000000         ; ------------------------------------------------------
+                       -------------------------
+    7 00000000                 THUMB                        ; Instruções do tip
+                                                            o Thumb-2
+    8 00000000         ; ------------------------------------------------------
+                       -------------------------
+    9 00000000         ; Declarações EQU - Defines
+   10 00000000         ;<NOME>         EQU <VALOR>
+   11 00000000         ; ------------------------------------------------------
+                       -------------------------
+   12 00000000         ; Área de Dados - Declarações de variáveis
+   13 00000000                 AREA             DATA, ALIGN=2
+   14 00000000         ; Se alguma variável for chamada em outro arquivo
+   15 00000000         ;EXPORT  <var> [DATA,SIZE=<tam>]   ; Permite chamar a va
+                       riável <var> a 
+   16 00000000         ; partir de outro arquivo
+   17 00000000         ;<var> SPACE <tam>                        ; Declara uma 
+                       variável de nome <var>
+   18 00000000         ; de <tam> bytes a partir da primeira 
+   19 00000000         ; posição da RAM  
+   20 00000000         
+   21 00000000         ; ------------------------------------------------------
+                       -------------------------
+   22 00000000         ; Área de Código - Tudo abaixo da diretiva a seguir será
+                        armazenado na memória de 
+   23 00000000         ;                  código
+   24 00000000                 AREA             |.text|, CODE, READONLY, ALIGN=
+2
+   25 00000000         
+   26 00000000         ; Se alguma função do arquivo for chamada em outro arqui
+                       vo 
+   27 00000000                 EXPORT           Start       ; Permite chamar a 
+                                                            função Start a part
+                                                            ir de 
+   28 00000000         ; outro arquivo. No caso startup.s
+   29 00000000         
+   30 00000000         ; Se chamar alguma função externa 
+   31 00000000         ;IMPORT <func>              ; Permite chamar dentro dest
+                       e arquivo uma 
+   32 00000000         ; função <func>
+   33 00000000         
+   34 00000000         ; ------------------------------------------------------
+                       -------------------------
+   35 00000000         ; Função main()
+   36 00000000         Start
+   37 00000000         
+   38 00000000         ;preencher vetor
+   39 00000000         
+   40 00000000 481D            LDR              R0, =0x20000500 
+                                                            ;definir endereço
+   41 00000002 F04F 01FF       MOV              R1, #0xFF   ;pos0
+   42 00000006 F840 1B01       STR              R1, [R0], #1
+   43 0000000A F04F 01FE       MOV              R1, #0xFE   ;pos1
+   44 0000000E F840 1B01       STR              R1, [R0], #1
+
+
+
+ARM Macro Assembler    Page 2 
+
+
+   45 00000012 F04F 01FD       MOV              R1, #0xFD   ;pos2
+   46 00000016 F840 1B01       STR              R1, [R0], #1
+   47 0000001A F04F 01FC       MOV              R1, #0xFC   ;pos3
+   48 0000001E F840 1B01       STR              R1, [R0], #1
+   49 00000022 F04F 01FB       MOV              R1, #0xFB   ;pos4
+   50 00000026 F840 1B01       STR              R1, [R0], #1
+   51 0000002A F04F 01FA       MOV              R1, #0xFA   ;pos5
+   52 0000002E F840 1B01       STR              R1, [R0], #1
+   53 00000032         ;fim do preenchimento
+   54 00000032         ;setup
+   55 00000032 4811            LDR              R0, =0x20000500 ;definir endere
+                                                            ço inicial
+   56 00000034 F04F 0300       MOV              R3, #0      ;i=0
+   57 00000038 F04F 0406       MOV              R4, #6      ;tamanho do vetor
+   58 0000003C         
+   59 0000003C         ;função
+   60 0000003C         loop
+   61 0000003C 7801            LDRB             R1, [R0]    ;carrega a posição 
+                                                            i
+   62 0000003E 7842            LDRB             R2, [R0,#1] ;carrega a posição 
+                                                            i++
+   63 00000040 F103 0301       ADD              R3, #1      ;i++
+   64 00000044 42A3            CMP              R3,R4       ;R3-R4
+   65 00000046 BF08            IT               EQ
+   66 00000048 F000 F80F       BLEQ             reset
+   67 0000004C 4291            CMP              R1,R2       ;R1 - R2
+   68 0000004E BF88 F000 
+              F803             BLHI             swap
+   69 00000054 F100 0001       ADD              R0,   #1    ;endereço+1
+   70 00000058 E7F0            B                loop        ;loop infinito
+   71 0000005A         
+   72 0000005A         
+   73 0000005A         
+   74 0000005A         swap
+   75 0000005A 460D            MOV              R5, R1      ;R5 = R1, R5=aux
+   76 0000005C 4611            MOV              R1, R2      ;R1 = R2
+   77 0000005E 462A            MOV              R2, R5      ;R2 = R5
+   78 00000060 F800 1B01       STRB             R1, [R0],#1
+   79 00000064 7002            STRB             R2, [R0]
+   80 00000066 F7FF FFE9       BL               loop
+   81 0000006A         reset
+   82 0000006A 4803            LDR              R0, =0x20000500 ;   ;definir en
+                                                            dereço
+   83 0000006C F04F 0300       MOV              R3, #0      ;i=0
+   84 00000070 F04F 0405       MOV              R4, #5      ;tamanho
+   85 00000074 E7E2            B                loop
+   86 00000076         
+   87 00000076         fim
+   88 00000076         
+   89 00000076 BF00            NOP
+   90 00000078                 ALIGN                        ; garante que o fim
+                                                             da seção está alin
+                                                            hada 
+   91 00000078                 END                          ; fim do arquivo
+              20000500 
+Command Line: --debug --xref --diag_suppress=9931 --cpu=Cortex-M4.fp --apcs=int
+erwork --depend=.\objects\bubblesort.d -o.\objects\bubblesort.o -I.\RTE\_Target
+_1 -IC:\Keil_v5\ARM\PACK\Keil\TM4C_DFP\1.1.0\Device\Include\TM4C129 -IC:\Keil_v
+5\ARM\CMSIS\Include --predefine="__EVAL SETA 1" --predefine="__UVISION_VERSION 
+
+
+
+ARM Macro Assembler    Page 3 
+
+
+SETA 528" --predefine="TM4C1294NCPDT SETA 1" --list=.\listings\bubblesort.lst b
+ubblesort.s
+
+
+
+ARM Macro Assembler    Page 1 Alphabetic symbol ordering
+Relocatable symbols
+
+DATA 00000000
+
+Symbol: DATA
+   Definitions
+      At line 13 in file bubblesort.s
+   Uses
+      None
+Comment: DATA unused
+1 symbol
+
+
+
+ARM Macro Assembler    Page 1 Alphabetic symbol ordering
+Relocatable symbols
+
+.text 00000000
+
+Symbol: .text
+   Definitions
+      At line 24 in file bubblesort.s
+   Uses
+      None
+Comment: .text unused
+Start 00000000
+
+Symbol: Start
+   Definitions
+      At line 36 in file bubblesort.s
+   Uses
+      At line 27 in file bubblesort.s
+Comment: Start used once
+fim 00000076
+
+Symbol: fim
+   Definitions
+      At line 87 in file bubblesort.s
+   Uses
+      None
+Comment: fim unused
+loop 0000003C
+
+Symbol: loop
+   Definitions
+      At line 60 in file bubblesort.s
+   Uses
+      At line 70 in file bubblesort.s
+      At line 80 in file bubblesort.s
+      At line 85 in file bubblesort.s
+
+reset 0000006A
+
+Symbol: reset
+   Definitions
+      At line 81 in file bubblesort.s
+   Uses
+      At line 66 in file bubblesort.s
+Comment: reset used once
+swap 0000005A
+
+Symbol: swap
+   Definitions
+      At line 74 in file bubblesort.s
+   Uses
+      At line 68 in file bubblesort.s
+Comment: swap used once
+6 symbols
+343 symbols in table

@@ -1,0 +1,227 @@
+
+
+
+ARM Macro Assembler    Page 1 
+
+
+    1 00000000         ; Exemplo.s
+    2 00000000         ; Desenvolvido para a placa EK-TM4C1294XL
+    3 00000000         ; Prof. Guilherme Peron
+    4 00000000         ; 12/03/2018
+    5 00000000         
+    6 00000000         ; ------------------------------------------------------
+                       -------------------------
+    7 00000000                 THUMB                        ; Instruções do tip
+                                                            o Thumb-2
+    8 00000000         ; ------------------------------------------------------
+                       -------------------------
+    9 00000000         ; Declarações EQU - Defines
+   10 00000000         ;<NOME>         EQU <VALOR>
+   11 00000000         ; ------------------------------------------------------
+                       -------------------------
+   12 00000000         ; Área de Dados - Declarações de variáveis
+   13 00000000                 AREA             DATA, ALIGN=2
+   14 00000000         ; Se alguma variável for chamada em outro arquivo
+   15 00000000         ;EXPORT  <var> [DATA,SIZE=<tam>]   ; Permite chamar a va
+                       riável <var> a 
+   16 00000000         ; partir de outro arquivo
+   17 00000000         ;<var> SPACE <tam>                        ; Declara uma 
+                       variável de nome <var>
+   18 00000000         ; de <tam> bytes a partir da primeira 
+   19 00000000         ; posição da RAM  
+   20 00000000         
+   21 00000000         ; ------------------------------------------------------
+                       -------------------------
+   22 00000000         ; Área de Código - Tudo abaixo da diretiva a seguir será
+                        armazenado na memória de 
+   23 00000000         ;                  código
+   24 00000000                 AREA             |.text|, CODE, READONLY, ALIGN=
+2
+   25 00000000         
+   26 00000000         ; Se alguma função do arquivo for chamada em outro arqui
+                       vo 
+   27 00000000                 EXPORT           Start       ; Permite chamar a 
+                                                            função Start a part
+                                                            ir de 
+   28 00000000         ; outro arquivo. No caso startup.s
+   29 00000000         
+   30 00000000         ; Se chamar alguma função externa 
+   31 00000000         ;IMPORT <func>              ; Permite chamar dentro dest
+                       e arquivo uma 
+   32 00000000         ; função <func>
+   33 00000000         
+   34 00000000         ; ------------------------------------------------------
+                       -------------------------
+   35 00000000         ; Função main()
+   36 00000000         Start
+   37 00000000         
+   38 00000000         ;preencher vetor
+   39 00000000         
+   40 00000000 F04F 01FF       MOV              R1,  #0xFF  ;pos0
+   41 00000004 482B            LDR              R0,  =0x20000500 ;   ;definir e
+                                                            ndereço
+   42 00000006 F800 1B01       STRB             R1,  [R0], #1
+   43 0000000A F04F 010C       MOV              R1,  #12    ;pos1
+   44 0000000E F800 1B01       STRB             R1,  [R0], #1
+
+
+
+ARM Macro Assembler    Page 2 
+
+
+   45 00000012 F04F 0102       MOV              R1,  #2     ;pos2
+   46 00000016 F800 1B01       STRB             R1,  [R0], #1
+   47 0000001A F04F 0143       MOV              R1,  #67    ;pos3
+   48 0000001E F800 1B01       STRB             R1,  [R0], #1
+   49 00000022 F04F 012A       MOV              R1,  #42    ;pos4
+   50 00000026 F800 1B01       STRB             R1,  [R0], #1
+   51 0000002A F04F 010F       MOV              R1,  #15    ;pos5
+   52 0000002E F800 1B01       STRB             R1,  [R0], #1
+   53 00000032 F04F 0113       MOV              R1,  #19    ;pos6
+   54 00000036 F800 1B01       STRB             R1,  [R0], #1
+   55 0000003A F04F 011A       MOV              R1,  #26    ;pos7
+   56 0000003E F800 1B01       STRB             R1,  [R0], #1
+   57 00000042 F04F 0158       MOV              R1,  #88    ;pos8
+   58 00000046 F800 1B01       STRB             R1,  [R0], #1
+   59 0000004A F04F 0101       MOV              R1,  #1     ;pos9
+   60 0000004E F800 1B01       STRB             R1,  [R0], #1
+   61 00000052         ;fim do preenchimento
+   62 00000052         
+   63 00000052 4818            LDR              R0,  =0x20000500 ; Redefinir en
+                                                            dereço para o começ
+                                                            o
+   64 00000054 F04F 0800       MOV              R8,  #0     ;i contador
+   65 00000058 F04F 0A00       MOV              R10, #0     ;j contador
+   66 0000005C F04F 0B0A       MOV              R11, #10    ;Tamanho
+   67 00000060         
+   68 00000060         
+   69 00000060         loop
+   70 00000060 F810 100A       LDRB             R1,  [R0,R10] ; Carrega a posN
+   71 00000064 F10A 0A01       ADD              R10,R10, #1 ; N_troca increment
+                                                            a 1 no contador j 
+   72 00000068 F810 200A       LDRB             R2, [R0,R10] ; Carrega a pos(N+
+                                                            1)...
+   73 0000006C 4291            CMP              R1, R2      ; CMP = R1 - R2, se
+                                                            ta bit z
+   74 0000006E BF88 F000 
+              F811             BLHI             troca       ; Se maior, troca
+   75 00000074         
+   76 00000074 F10A 0A01       ADD              R10,R10,#1  ;INICIO IF RESET
+   77 00000078 45DA            CMP              R10,R11     ;VERIFICA A POSICAO
+                                                             É IGUAL OU MENOR A
+                                                             10
+   78 0000007A DA02            BGE              reset       ;Reseta o contador 
+                                                            do tamanho
+   79 0000007C F1AA 0A01       SUB              R10,R10,#1  ;FIM IF RESET
+   80 00000080 E7EE            B                loop        ;VAI PARA
+   81 00000082         
+   82 00000082         reset
+   83 00000082 F1B8 0F00       CMP              R8,  #0     ;
+   84 00000086 D913            BLS              fim         ;VAI PARA
+   85 00000088 F1AB 0B01       SUB              R11,R11,#1  ;
+   86 0000008C F04F 0A00       MOV              R10, #0
+   87 00000090 F04F 0800       MOV              R8,  #0
+   88 00000094 E7E4            B                loop
+   89 00000096         
+   90 00000096         troca
+   91 00000096 F04F 0801       MOV              R8,  #1
+   92 0000009A 460B            MOV              R3,  R1     ;R3  = aux
+   93 0000009C 4611            MOV              R1,  R2     ;R1  =  R2;
+   94 0000009E 461A            MOV              R2,  R3     ;R2  = R3
+
+
+
+ARM Macro Assembler    Page 3 
+
+
+   95 000000A0 46D1            MOV              R9,  R10    ;R9  = R10
+   96 000000A2 F800 2009       STRB             R2,  [R0,R9]
+   97 000000A6 F1A9 0901       SUB              R9,  R9, #1
+   98 000000AA F800 1009       STRB             R1, [R0, R9]
+   99 000000AE 4770            BX               R14
+  100 000000B0         
+  101 000000B0         fim
+  102 000000B0         
+  103 000000B0 BF00            NOP
+  104 000000B2 00 00           ALIGN                        ; garante que o fim
+                                                             da seção está alin
+                                                            hada 
+  105 000000B4                 END                          ; fim do arquivo
+              20000500 
+Command Line: --debug --xref --diag_suppress=9931 --cpu=Cortex-M4.fp --apcs=int
+erwork --depend=.\objects\exemplo.d -o.\objects\exemplo.o -I.\RTE\_Target_1 -IC
+:\Keil_v5\ARM\PACK\Keil\TM4C_DFP\1.1.0\Device\Include\TM4C129 -IC:\Keil_v5\ARM\
+CMSIS\Include --predefine="__EVAL SETA 1" --predefine="__UVISION_VERSION SETA 5
+28" --predefine="TM4C1294NCPDT SETA 1" --list=.\listings\exemplo.lst exemplo.s
+
+
+
+ARM Macro Assembler    Page 1 Alphabetic symbol ordering
+Relocatable symbols
+
+DATA 00000000
+
+Symbol: DATA
+   Definitions
+      At line 13 in file exemplo.s
+   Uses
+      None
+Comment: DATA unused
+1 symbol
+
+
+
+ARM Macro Assembler    Page 1 Alphabetic symbol ordering
+Relocatable symbols
+
+.text 00000000
+
+Symbol: .text
+   Definitions
+      At line 24 in file exemplo.s
+   Uses
+      None
+Comment: .text unused
+Start 00000000
+
+Symbol: Start
+   Definitions
+      At line 36 in file exemplo.s
+   Uses
+      At line 27 in file exemplo.s
+Comment: Start used once
+fim 000000B0
+
+Symbol: fim
+   Definitions
+      At line 101 in file exemplo.s
+   Uses
+      At line 84 in file exemplo.s
+Comment: fim used once
+loop 00000060
+
+Symbol: loop
+   Definitions
+      At line 69 in file exemplo.s
+   Uses
+      At line 80 in file exemplo.s
+      At line 88 in file exemplo.s
+
+reset 00000082
+
+Symbol: reset
+   Definitions
+      At line 82 in file exemplo.s
+   Uses
+      At line 78 in file exemplo.s
+Comment: reset used once
+troca 00000096
+
+Symbol: troca
+   Definitions
+      At line 90 in file exemplo.s
+   Uses
+      At line 74 in file exemplo.s
+Comment: troca used once
+6 symbols
+343 symbols in table
