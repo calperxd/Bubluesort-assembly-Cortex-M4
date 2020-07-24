@@ -1,4 +1,4 @@
-*.python linguist-detectable=true
+*.s linguist-detectable=true
 * linguist-vendored
 *.htm linguist-vendored=false
 * linguist-vendored
