@@ -1,4 +1,5 @@
 
 * linguist-vendored
 *.htm linguist-vendored=false
+* linguist-vendored
 *.html linguist-vendored=false
